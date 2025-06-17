@@ -129,7 +129,9 @@ int main()
 
         cout << "0 - Sair" << endl;
         cout << "1 - Gerar senha" << endl;
-        cout << "2 - Realizar atendimento" << endl;
+        cout << "2 - Abrir Guiche" << endl;
+	cout << "3 - Realizar atendimento" << endl;
+	cout << "4 - Listar senhas atendidas" << endl;
         cout << "Senhas aguardando: " << countPont(senhasGeradasPont) << endl;
         cout << "Opcao: ";
         cin >> opcao;
@@ -177,7 +179,7 @@ int main()
 			    if (!isEmptyPont(senhasGeradasPont)) {
             
 			        cout << "Ainda ha senhas aguardando atendimento!\n";
-                    opcao = -1; // força o loop continuar
+                    opcao = -1; // forÃ§a o loop continuar
             
 			    }
                 break;
