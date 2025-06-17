@@ -159,7 +159,13 @@ int main()
             
             case 2:{
             
-			    if (!isEmptyPont(senhasGeradasPont)) {
+			
+            
+			}
+
+		 case 3:{
+            
+			        if (!isEmptyPont(senhasGeradasPont)) {
             
 			        int s = dequeuePont(senhasGeradasPont);
                     enqueueVet(senhasAtendidasVet, s);
@@ -171,6 +177,12 @@ int main()
             
 			    }
                 break;
+            
+			}
+
+		 case 4:{
+            
+			    
             
 			}
             
