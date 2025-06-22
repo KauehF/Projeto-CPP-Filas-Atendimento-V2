@@ -260,7 +260,7 @@ int main() {
             default: {
             	
             	cout << endl;
-                cout << "Opcao invalida!\n";
+                cout << "Opcao invalida!" << endl;
                 opcao = -1;
                 
 				break;
@@ -279,7 +279,7 @@ int main() {
     
 	}
 
-    cout << "\nTotal de senhas atendidas: " << totalAtendidas << endl;
+    cout << "Total de senhas atendidas: " << totalAtendidas << endl;
 
     freePont(senhasGeradas);
     liberarGuiches(guiches);
