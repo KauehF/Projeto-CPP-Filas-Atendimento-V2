@@ -1,56 +1,6 @@
 #include <iostream>
 using namespace std;
 
-#define MAX 100
-
-//fila feita com vetor
-
-struct FilaVet {
-    int dados[MAX];
-    int ini;
-    int fim;
-};
-
-FilaVet* initVet() {
-    FilaVet* f = new FilaVet;
-    f->ini = f->fim = 0;
-    return f;
-}
-
-int isEmptyVet(FilaVet* f) {
-    return f->ini == f->fim;
-}
-
-int incrementa(int i) {
-    return (i + 1) % MAX;
-}
-
-int enqueueVet(FilaVet* f, int v) {
-    int prox = incrementa(f->fim);
-    if (prox == f->ini) return 0; // cheio
-    f->dados[f->fim] = v;
-    f->fim = prox;
-    return 1;
-}
-
-int dequeueVet(FilaVet* f) {
-    if (isEmptyVet(f)) return -1;
-    int val = f->dados[f->ini];
-    f->ini = incrementa(f->ini);
-    return val;
-}
-
-int countVet(FilaVet* f) {
-    if (f->fim >= f->ini) return f->fim - f->ini;
-    return MAX - f->ini + f->fim;
-}
-
-void freeVet(FilaVet* f) {
-    delete f;
-}
-
-//fila feita com ponteiro
-
 struct NoPont {
     int dado;
     NoPont* prox;
@@ -64,7 +14,7 @@ struct FilaPont {
 FilaPont* initPont() {
     FilaPont* f = new FilaPont;
     f->ini = NULL;
-	f->fim = NULL;
+    f->fim = NULL;
     return f;
 }
 
@@ -114,107 +64,225 @@ void freePont(FilaPont* f) {
     delete f;
 }
 
-int main()
-{
-	
-	FilaPont* senhasGeradasPont = initPont();
-    FilaVet* senhasAtendidasVet = initVet();
-    
+struct Guiche {
+    int id;
+    FilaPont* senhasAtendidas;
+    Guiche* prox;
+};
+
+struct ListaGuiche {
+    Guiche* ini;
+};
+
+ListaGuiche* initListaGuiche() {
+    ListaGuiche* lista = new ListaGuiche;
+    lista->ini = NULL;
+    return lista;
+}
+
+void adicionarGuiche(ListaGuiche* lista, int id) {
+    Guiche* g = new Guiche;
+    g->id = id;
+    g->senhasAtendidas = initPont();
+    g->prox = lista->ini;
+    lista->ini = g;
+}
+
+Guiche* buscarGuiche(ListaGuiche* lista, int id) {
+    Guiche* atual = lista->ini;
+    while (atual != NULL) {
+        if (atual->id == id)
+            return atual;
+        atual = atual->prox;
+    }
+    return NULL;
+}
+
+int contarGuiches(ListaGuiche* lista) {
+    int qtde = 0;
+    Guiche* atual = lista->ini;
+    while (atual != NULL) {
+        qtde++;
+        atual = atual->prox;
+    }
+    return qtde;
+}
+
+void listarSenhasGuiche(Guiche* g) {
+    NoPont* no = g->senhasAtendidas->ini;
+    cout << "Senhas atendidas pelo guiche " << g->id << ": ";
+    if (!no) {
+        cout << "Nenhuma." << endl;
+        return;
+    }
+    while (no != NULL) {
+        cout << no->dado << " ";
+        no = no->prox;
+    }
+    cout << endl;
+}
+
+void liberarGuiches(ListaGuiche* lista) {
+    Guiche* atual = lista->ini;
+    while (atual != NULL) {
+        Guiche* aux = atual->prox;
+        freePont(atual->senhasAtendidas);
+        delete atual;
+        atual = aux;
+    }
+    delete lista;
+}
+
+int main() {
+    FilaPont* senhasGeradas = initPont();
+    ListaGuiche* guiches = initListaGuiche();
+
     int senha = 1;
     int opcao;
 
     do {
-    	
-    	cout << endl;
-
+        cout << endl;
+        cout << "------------------------------" << endl;
         cout << "0 - Sair" << endl;
         cout << "1 - Gerar senha" << endl;
-        cout << "2 - Abrir Guiche" << endl;
-	cout << "3 - Realizar atendimento" << endl;
-	cout << "4 - Listar senhas atendidas" << endl;
-        cout << "Senhas aguardando: " << countPont(senhasGeradasPont) << endl;
+        cout << "2 - Abrir guiche" << endl;
+        cout << "3 - Realizar atendimento" << endl;
+        cout << "4 - Listar senhas atendidas" << endl;
+        cout << "Senhas aguardando: " << countPont(senhasGeradas) << endl;
+        cout << "Guiches abertos: " << contarGuiches(guiches) << endl;
         cout << "Opcao: ";
         cin >> opcao;
-        
-        if (cin.fail()){
-        	
-        cin.clear(); 
-        cin.ignore(1000, '\n');
-        cout << "Entrada invalida! Digite um numero." << endl;
-        opcao = -1;
-		 
-        continue;
-		 
-    	}
+
+
+        if (cin.fail()) {
+            cin.clear();
+            cin.ignore(1000, '\n');
+            cout << endl;            
+            cout << "Entrada invalida! Digite um numero." << endl;
+            opcao = -1;
+            continue;
+        }
 
         switch (opcao) {
-        	
             case 1: {
-            
-			    cout << "Senha gerada: " << senha << endl;
-                enqueuePont(senhasGeradasPont, senha++);
+            	
+				cout << endl;
+                cout << "Senha gerada: " << senha << endl;
+                enqueuePont(senhasGeradas, senha++);
                 break;
             
-			}
-            
-            case 2:{
-            
-			
-            
-			}
-
-		 case 3:{
-            
-			        if (!isEmptyPont(senhasGeradasPont)) {
-            
-			        int s = dequeuePont(senhasGeradasPont);
-                    enqueueVet(senhasAtendidasVet, s);
-                    cout << "Atendendo senha: " << s << endl;
-            
-			    } else {
-            
-			        cout << "Nenhuma senha para atender.\n";
-            
-			    }
+		}
+            case 2: {
+                int id;
+                
+				cout << endl;
+                cout << "Digite o ID do guiche: ";
+                cin >> id;
+                
+				if (buscarGuiche(guiches, id)) {
+                
+					cout << endl;
+                    cout << "Guiche ja existe." << endl;
+                
+				} else {
+                	
+                    adicionarGuiche(guiches, id);
+                    cout << endl;
+                    cout << "Guiche " << id << " aberto." << endl;
+                
+				}
                 break;
-            
-			}
+            }
+            case 3: {
+                if (isEmptyPont(senhasGeradas)) {
 
-		 case 4:{
+                	cout << endl;
+                    cout << "Nenhuma senha aguardando atendimento." << endl;
+                    break;
+
+                }
+
+                int id;
+                cout << endl;
+                cout << "Digite o ID do guiche: ";
+                cin >> id;
+                Guiche* g = buscarGuiche(guiches, id);
+                
+                if (!g) {
+
+                	cout << endl;
+                    cout << "Guiche nao encontrado." << endl;;
+
+                } else {
+
+                    int s = dequeuePont(senhasGeradas);
+                    enqueuePont(g->senhasAtendidas, s);
+                    cout << endl;
+				    cout << "Guiche " << id << " atendeu a senha " << s << endl;
+                
+				}
+                
+				break;
+            }
             
-			    
-            
-			}
+			case 4: {
+                int id;
+                cout << endl;
+                cout << "Digite o ID do guiche: ";
+                cin >> id;
+                Guiche* g = buscarGuiche(guiches, id);
+                
+                if (!g) {
+                	
+                	cout << endl;
+                    cout << "Guiche nao encontrado." << endl;
+
+                } else {
+                
+				    listarSenhasGuiche(g);
+                
+				}
+                
+				break;
+            }
             
             case 0: {
-            
-			    if (!isEmptyPont(senhasGeradasPont)) {
-            
-			        cout << "Ainda ha senhas aguardando atendimento!\n";
-                    opcao = -1; // força o loop continuar
-            
-			    }
-                break;
-            
-			}
-            
-            default:{
-            
-			    cout << "Opcao invalida!\n";
-				opcao = -1;
+                if (!isEmptyPont(senhasGeradas)) {
+                	
+					cout << endl;
+                    cout << "Ainda ha senhas aguardando atendimento!" << endl;
+                    opcao = -1; 
+                
+				}
+                
 				break;
-				
-			}
-				
-        }
-        
+            }
+            default: {
+            	
+            	cout << endl;
+                cout << "Opcao invalida!" << endl;
+                opcao = -1;
+                
+				break;
+            }
+            
+		}
+
     } while (opcao != 0);
 
-    cout << "\nTotal de senhas atendidas: " << countVet(senhasAtendidasVet) << endl;
+    int totalAtendidas = 0;
+    Guiche* atual = guiches->ini;
+    while (atual != NULL) {
+    	
+        totalAtendidas += countPont(atual->senhasAtendidas);
+        atual = atual->prox;
+    
+	}
 
+    cout << "Total de senhas atendidas: " << totalAtendidas << endl;
 
-    freePont(senhasGeradasPont);
-    freeVet(senhasAtendidasVet);
-	
-	return 0;
+    freePont(senhasGeradas);
+    liberarGuiches(guiches);
+
+    return 0;
 }
